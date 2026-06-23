@@ -53,8 +53,11 @@ fn suspend_and_resume() {
     assert!(coroutine.done());
 }
 
-// Linked backtraces are not supported on x86 Windows.
+// Linked backtraces are not supported on x86 Windows, nor across the coroutine
+// boundary on AArch64 Windows (SEH unwind opcodes can't follow the parent link
+// across a stack switch).
 #[cfg_attr(all(windows, target_arch = "x86"), ignore)]
+#[cfg_attr(all(windows, target_arch = "aarch64"), ignore)]
 #[test]
 fn backtrace_traces_to_host() {
     #[inline(never)] // try to get this to show up in backtraces
@@ -686,6 +689,8 @@ mod trap_handler {
                     sp = (*(*exception_info).ContextRecord).Rsp as usize;
                 } else if #[cfg(target_arch = "x86")] {
                     sp = (*(*exception_info).ContextRecord).Esp as usize;
+                } else if #[cfg(target_arch = "aarch64")] {
+                    sp = (*(*exception_info).ContextRecord).Sp as usize;
                 } else {
                     compile_error!("Unsupported platform");
                 }
@@ -713,6 +718,14 @@ mod trap_handler {
                     (*(*exception_info).ContextRecord).Ebx = ebx;
                     (*(*exception_info).ContextRecord).Ecx = ecx;
                     (*(*exception_info).ContextRecord).Edx = edx;
+                } else if #[cfg(target_arch = "aarch64")] {
+                    let TrapHandlerRegs { pc, sp, x0, x1, x29, lr } = regs;
+                    (*(*exception_info).ContextRecord).Pc = pc;
+                    (*(*exception_info).ContextRecord).Sp = sp;
+                    (*(*exception_info).ContextRecord).Anonymous.Anonymous.X0 = x0;
+                    (*(*exception_info).ContextRecord).Anonymous.Anonymous.X1 = x1;
+                    (*(*exception_info).ContextRecord).Anonymous.Anonymous.Fp = x29;
+                    (*(*exception_info).ContextRecord).Anonymous.Anonymous.Lr = lr;
                 } else {
                     compile_error!("Unsupported platform");
                 }

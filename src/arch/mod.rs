@@ -160,6 +160,9 @@ cfg_if::cfg_if! {
     } else if #[cfg(all(target_arch = "aarch64", not(windows)))] {
         mod aarch64;
         pub use self::aarch64::*;
+    } else if #[cfg(all(target_arch = "aarch64", windows))] {
+        mod aarch64_windows;
+        pub use self::aarch64_windows::*;
     } else if #[cfg(all(target_arch = "arm", not(any(windows, target_vendor = "apple"))))] {
         // Apple on ARM uses SJLJ unwinding which we don't support.
         mod arm;

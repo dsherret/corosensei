@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added support for the `aarch64-pc-windows-msvc` (Windows on ARM) target
+
 ## [0.3.4](https://github.com/Amanieu/corosensei/compare/v0.3.3...v0.3.4) - 2026-05-24
 
 ### Added

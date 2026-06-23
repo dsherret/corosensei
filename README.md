@@ -82,13 +82,18 @@ This crate currently supports the following targets:
 | ----------- | --------------------------------- | ------------------------ | ------- | --------------- |
 | x86_64      | ✅                                 | ✅                        | ✅       | ✅             |
 | x86         | ✅                                 | ❌                        | ⚠️*      | ❌             |
-| AArch64     | ✅                                 | ✅                        | ❌       | ✅             |
+| AArch64     | ✅                                 | ✅                        | ⚠️†      | ✅             |
 | ARM         | ✅                                 | ❌                        | ❌       | ❌             |
 | RISC-V      | ✅                                 | ❌                        | ❌       | ❌             |
 | LoongArch64 | ✅                                 | ❌                        | ❌       | ❌             |
 | PowerPC64   | ✅                                 | ❌                        | ❌       | ❌             |
 
 \* Linked backtraces are not supported on x86 Windows.
+
+† Linked backtraces do not cross the coroutine or `on_stack` boundary on AArch64
+Windows. The trampolines' SEH unwind info must dead-end on the switched stack so
+that panics can be caught there (Windows does not update the TEB stack bounds
+across a manual stack switch, so an exception cannot be dispatched across one).
 
 Feel free to open an issue if your target is not supported yet.
 

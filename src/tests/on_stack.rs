@@ -20,8 +20,11 @@ fn smoke() {
     assert_eq!(result, "hello".to_string());
 }
 
-// Linked backtraces are not supported on x86 Windows.
+// Linked backtraces are not supported on x86 Windows, nor across the on_stack
+// boundary on AArch64 Windows (the trampoline's SEH unwind must dead-end on the
+// switched stack so that panics can be caught there; see aarch64_windows.rs).
 #[cfg_attr(all(windows, target_arch = "x86"), ignore)]
+#[cfg_attr(all(windows, target_arch = "aarch64"), ignore)]
 #[test]
 fn backtrace_traces_to_host() {
     #[inline(never)] // try to get this to show up in backtraces
